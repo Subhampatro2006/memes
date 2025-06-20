@@ -6,12 +6,16 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.FileProvider;
 
 import com.bumptech.glide.Glide;
@@ -27,7 +31,7 @@ import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ImageView imgMeme;
+    private ImageView imgMeme, imgProfile;
     private Button btnPrev, btnNext, btnLike, btnShare, btnLikedMemes;
     private TextView tvCounter;
 
@@ -42,6 +46,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(""); // Title centered via XML
+        }
 
         initializeViews();
         loadMemeUrls();
@@ -90,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Added to liked", Toast.LENGTH_SHORT).show();
             }
             updateLikeButton(url);
-            saveLikedMemes();
+            autoSaveLikedMemes();
         });
 
         btnShare.setOnClickListener(v -> shareMeme(memeUrls.get(currentIndex)));
@@ -99,15 +111,16 @@ public class MainActivity extends AppCompatActivity {
             Intent i = new Intent(MainActivity.this, LikedMemesActivity.class);
             startActivity(i);
         });
+
+        imgProfile.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, UserProfileActivity.class));
+        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // 🔁 Refresh liked memes from preferences
         likedMemes = new HashSet<>(preferences.getStringSet("urls", new HashSet<>()));
-
-        // 🔁 Update like button if current meme is still valid
         if (!memeUrls.isEmpty()) {
             String url = memeUrls.get(currentIndex);
             updateLikeButton(url);
@@ -122,6 +135,7 @@ public class MainActivity extends AppCompatActivity {
         btnShare = findViewById(R.id.btnShare);
         btnLikedMemes = findViewById(R.id.btnLikedMemes);
         tvCounter = findViewById(R.id.tvCounter);
+        imgProfile = findViewById(R.id.imgProfile); // Fixed here
     }
 
     private void loadMemeUrls() {
@@ -149,12 +163,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void displayMeme() {
         if (memeUrls.isEmpty()) return;
-
         String currentUrl = memeUrls.get(currentIndex);
 
-        Glide.with(this)
-                .load(currentUrl)
-                .into(imgMeme);
+        Glide.with(this).load(currentUrl).into(imgMeme);
 
         updateLikeButton(currentUrl);
         tvCounter.setText(String.format("#%02d", currentIndex + 1));
@@ -164,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
         btnLike.setText(likedMemes.contains(url) ? "Unlike 🗑️" : "Like ❤️");
     }
 
-    private void saveLikedMemes() {
+    private void autoSaveLikedMemes() {
         preferences.edit().putStringSet("urls", likedMemes).apply();
     }
 
@@ -199,5 +210,23 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onLoadCleared(Drawable placeholder) {}
                 });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu); // Ensure you have menu_profile & menu_logout items
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menu_logout) {
+            SharedPreferences loginPrefs = getSharedPreferences("user_data", MODE_PRIVATE);
+            loginPrefs.edit().remove("auto_login").apply();
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
