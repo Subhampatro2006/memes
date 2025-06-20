@@ -1,3 +1,5 @@
+// Step 1: MainActivity.java - Cleaned and Updated with Theme Switcher
+
 package com.example.memes;
 
 import android.content.Intent;
@@ -14,7 +16,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.FileProvider;
 
@@ -31,7 +35,7 @@ import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ImageView imgMeme, imgProfile;
+    private ImageView imgMeme, imgProfile, btnThemeSwitcher;
     private Button btnPrev, btnNext, btnLike, btnShare, btnLikedMemes;
     private TextView tvCounter;
 
@@ -44,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        applySavedTheme();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -52,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setTitle(""); // Title centered via XML
+            actionBar.setTitle("");
         }
 
         initializeViews();
@@ -60,7 +65,8 @@ public class MainActivity extends AppCompatActivity {
         allMemes.addAll(memeUrls);
 
         preferences = getSharedPreferences("liked_memes", MODE_PRIVATE);
-        likedMemes = new HashSet<>(preferences.getStringSet("urls", new HashSet<>()));
+        likedMemes = new HashSet<>(preferences.getStringSet("urls", new HashSet<>()))
+        ;
 
         Intent intent = getIntent();
         if (intent.hasExtra("preview_url")) {
@@ -115,6 +121,24 @@ public class MainActivity extends AppCompatActivity {
         imgProfile.setOnClickListener(v -> {
             startActivity(new Intent(MainActivity.this, UserProfileActivity.class));
         });
+
+        btnThemeSwitcher.setOnClickListener(v -> showThemeSelectionDialog());
+    }
+
+    private void applySavedTheme() {
+        SharedPreferences prefs = getSharedPreferences("theme_pref", MODE_PRIVATE);
+        int themeMode = prefs.getInt("theme_mode", 2);
+        switch (themeMode) {
+            case 0:
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                break;
+            case 1:
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                break;
+            default:
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+                break;
+        }
     }
 
     @Override
@@ -135,7 +159,35 @@ public class MainActivity extends AppCompatActivity {
         btnShare = findViewById(R.id.btnShare);
         btnLikedMemes = findViewById(R.id.btnLikedMemes);
         tvCounter = findViewById(R.id.tvCounter);
-        imgProfile = findViewById(R.id.imgProfile); // Fixed here
+        imgProfile = findViewById(R.id.imgProfile);
+        btnThemeSwitcher = findViewById(R.id.btnThemeSwitcher);
+    }
+
+    private void showThemeSelectionDialog() {
+        final String[] options = {"🌞 Light", "🌙 Dark", "⚙ System Default"};
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Choose Theme");
+        builder.setItems(options, (dialog, which) -> {
+            switch (which) {
+                case 0:
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                    break;
+                case 1:
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                    break;
+                default:
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+                    break;
+            }
+
+            SharedPreferences.Editor editor = getSharedPreferences("theme_pref", MODE_PRIVATE).edit();
+            editor.putInt("theme_mode", which);
+            editor.apply();
+            recreate();
+        });
+
+        builder.show();
     }
 
     private void loadMemeUrls() {
@@ -164,9 +216,7 @@ public class MainActivity extends AppCompatActivity {
     private void displayMeme() {
         if (memeUrls.isEmpty()) return;
         String currentUrl = memeUrls.get(currentIndex);
-
         Glide.with(this).load(currentUrl).into(imgMeme);
-
         updateLikeButton(currentUrl);
         tvCounter.setText(String.format("#%02d", currentIndex + 1));
     }
@@ -214,19 +264,28 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu, menu); // Ensure you have menu_profile & menu_logout items
+        getMenuInflater().inflate(R.menu.main_menu, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.menu_logout) {
+        int id = item.getItemId();
+
+        if (id == R.id.menu_logout) {
             SharedPreferences loginPrefs = getSharedPreferences("user_data", MODE_PRIVATE);
             loginPrefs.edit().remove("auto_login").apply();
             startActivity(new Intent(this, LoginActivity.class));
             finish();
             return true;
+
+        } else if (id == R.id.menu_change_password) {
+            startActivity(new Intent(this, ChangePasswordActivity.class));
+            return true;
         }
+
         return super.onOptionsItemSelected(item);
     }
+
+
 }

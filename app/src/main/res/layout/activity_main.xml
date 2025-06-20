@@ -4,27 +4,28 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="?android:windowBackground">
 
-    <!-- Toolbar with embedded layout -->
+    <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:layout_constraintTop_toTopOf="parent"
         app:title=""
-        app:layout_constraintTop_toTopOf="parent">
+        app:titleTextColor="@android:color/white">
 
         <!-- Profile Icon (Left) -->
         <ImageView
             android:id="@+id/imgProfile"
             android:layout_width="36dp"
             android:layout_height="36dp"
+            android:layout_marginStart="16dp"
             android:src="@drawable/ic_profile_placeholder"
             android:contentDescription="Profile"
             android:scaleType="centerCrop"
-            android:layout_marginStart="16dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
             android:focusable="true"
@@ -39,18 +40,33 @@
             android:text="#01"
             android:textStyle="bold"
             android:textColor="@android:color/white"
-            android:textSize="18sp"/>
+            android:textSize="18sp" />
     </androidx.appcompat.widget.Toolbar>
 
+    <!-- Theme Switcher Button (below Toolbar, left corner) -->
+    <ImageView
+        android:id="@+id/btnThemeSwitcher"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:src="@drawable/ic_theme"
+        android:contentDescription="Theme Switcher"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:scaleType="centerInside"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <!-- Meme Image -->
     <ImageView
         android:id="@+id/imgMeme"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:scaleType="fitCenter"
         android:layout_margin="8dp"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        android:scaleType="fitCenter"
+        app:layout_constraintTop_toBottomOf="@id/btnThemeSwitcher"
         app:layout_constraintBottom_toTopOf="@id/buttonsTopLayout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -60,9 +76,9 @@
         android:id="@+id/buttonsTopLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_margin="8dp"
         android:orientation="horizontal"
         android:gravity="center"
-        android:layout_margin="8dp"
         app:layout_constraintBottom_toTopOf="@id/buttonsBottomLayout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -86,9 +102,9 @@
         android:id="@+id/buttonsBottomLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
         android:orientation="horizontal"
         android:gravity="center"
-        android:layout_marginBottom="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
