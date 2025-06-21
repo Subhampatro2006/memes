@@ -1,21 +1,62 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# ------------------------------
+# General Android settings
+# ------------------------------
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Keep all activities, services, broadcast receivers, and content providers
+-keep class * extends android.app.Activity
+-keep class * extends android.app.Service
+-keep class * extends android.content.BroadcastReceiver
+-keep class * extends android.content.ContentProvider
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# ------------------------------
+# BiometricPrompt
+# ------------------------------
+-keep class androidx.biometric.** { *; }
+-dontwarn androidx.biometric.**
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# ------------------------------
+# Room Database
+# ------------------------------
+-keep class androidx.room.** { *; }
+-dontwarn androidx.room.**
+
+# For Room DAO and entities
+-keep class com.example.memes.database.** { *; }
+
+# ------------------------------
+# Glide (optional)
+# ------------------------------
+-keep class com.bumptech.glide.** { *; }
+-dontwarn com.bumptech.glide.**
+
+# ------------------------------
+# Java 8+ API (if using desugar)
+# ------------------------------
+-dontwarn java.time.**
+-dontwarn java.lang.invoke.*
+
+# ------------------------------
+# Serializable models (optional)
+# ------------------------------
+-keepclassmembers class * implements java.io.Serializable {
+    static final long serialVersionUID;
+    private static final java.io.ObjectStreamField[] serialPersistentFields;
+    private void writeObject(java.io.ObjectOutputStream);
+    private void readObject(java.io.ObjectInputStream);
+    java.lang.Object writeReplace();
+    java.lang.Object readResolve();
+}
+
+# ------------------------------
+# Debugging (optional)
+# ------------------------------
+# Uncomment to keep logs and debugging symbols
+# -keep class android.util.Log { *; }
+# -keep class * { public private *; }
+
+# ------------------------------
+# Final optimization
+# ------------------------------
+-dontwarn org.jetbrains.annotations.**

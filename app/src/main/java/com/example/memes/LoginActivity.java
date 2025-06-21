@@ -34,7 +34,6 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // Initialize views
         edtUsername = findViewById(R.id.edtUsername);
         edtPassword = findViewById(R.id.edtPassword);
         btnLogin = findViewById(R.id.btnLogin);
@@ -42,7 +41,6 @@ public class LoginActivity extends AppCompatActivity {
         chkRemember = findViewById(R.id.chkRemember);
         imgFingerprint = findViewById(R.id.imgFingerprint);
 
-        // Load shared preferences
         prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
         boolean remember = prefs.getBoolean("remember", false);
         if (remember) {
@@ -55,15 +53,12 @@ public class LoginActivity extends AppCompatActivity {
 
         setupBiometric();
 
-        // Login button
         btnLogin.setOnClickListener(v -> loginUser());
 
-        // Register button
         btnRegister.setOnClickListener(v -> {
             startActivity(new Intent(this, RegisterActivity.class));
         });
 
-        // Fingerprint icon click
         imgFingerprint.setOnClickListener(v -> biometricPrompt.authenticate(promptInfo));
     }
 
@@ -73,7 +68,6 @@ public class LoginActivity extends AppCompatActivity {
 
         String savedPass = prefs.getString(user, null);
         if (savedPass != null && savedPass.equals(pass)) {
-
             if (chkRemember.isChecked()) {
                 prefs.edit()
                         .putString("remember_user", user)
@@ -92,17 +86,16 @@ public class LoginActivity extends AppCompatActivity {
 
             startActivity(new Intent(this, WelcomeActivity.class));
             finish();
-
         } else {
             Toast.makeText(this, "Invalid credentials!", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void setupBiometric() {
-        // Check biometric availability
         BiometricManager biometricManager = BiometricManager.from(this);
         int canAuth = biometricManager.canAuthenticate(
-                BiometricManager.Authenticators.BIOMETRIC_STRONG | BiometricManager.Authenticators.DEVICE_CREDENTIAL
+                BiometricManager.Authenticators.BIOMETRIC_WEAK |
+                        BiometricManager.Authenticators.DEVICE_CREDENTIAL
         );
 
         if (canAuth == BiometricManager.BIOMETRIC_SUCCESS) {
@@ -141,12 +134,13 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        // Set prompt UI
         promptInfo = new BiometricPrompt.PromptInfo.Builder()
                 .setTitle("Biometric Login")
-                .setSubtitle("Use your fingerprint or device credentials to login")
-                .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG | BiometricManager.Authenticators.DEVICE_CREDENTIAL)
+                .setSubtitle("Use fingerprint or device credentials")
+                .setAllowedAuthenticators(
+                        BiometricManager.Authenticators.BIOMETRIC_WEAK |
+                                BiometricManager.Authenticators.DEVICE_CREDENTIAL
+                )
                 .build();
-
     }
 }
